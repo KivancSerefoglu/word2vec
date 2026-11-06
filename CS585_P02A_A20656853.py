@@ -2,6 +2,8 @@ import sys
 from pathlib import Path
 import re
 import numpy as np
+from collections import Counter
+
 
 
 class word2Vec:
@@ -16,25 +18,32 @@ class word2Vec:
             -0.5 , 0.5, (len(self.V), self.D)
         )
 
-    # generate positive pairs. its context winvow is 2
-    def generate_positive_pairs(self, tokens):
+    # generate pairs as positive and negative. its context window is 2
+    def generate_training_pairs(self, tokens):
         pairs = []
+        vocab_size = len(self.V)
 
-        for target_position in range(len(tokens)):
-            target_word = tokens[target_position]
+        for target_position, target_word in enumerate(tokens):
             target_index = self.word_to_index[target_word]
 
             start = max(0, target_position - 2)
             end = min(len(tokens), target_position + 3)
 
-            for context_position in range(start, end):
-                if context_position == target_position:
-                    continue
+            context_indices = [
+                self.word_to_index[tokens[position]]
+                for position in range(start, end)
+                if position != target_position
+            ]
 
-                context_word = tokens[context_position]
-                context_index = self.word_to_index[context_word]
-
+            for context_index in context_indices:
                 pairs.append((target_index, context_index, 1))
+
+                negative_index = np.random.choice(
+                    vocab_size,
+                    p=self.negative_probabilities
+                )
+
+                pairs.append((target_index, negative_index, 0))
 
         return pairs
 
@@ -67,9 +76,11 @@ class word2Vec:
         # Creating Vocabulary from the given file by using white space tokenization
         with open(self.corpus_path, "r", encoding="utf-8") as file:
                 text = file.read()
-        
-        text = re.sub(r"[^A-Za-z\s]", "", text)
+
+        text = re.sub(r"[^A-Za-z]", " ", text)
         text = text.lower()
+
+        self.tokens = text.split()
 
         self.V = sorted(set(text.split()))
 
@@ -86,7 +97,21 @@ class word2Vec:
     
 
     def main(self):
-        print(self.target_embeddings[self.word_to_index["alice"]])
+
+
+        word_counts = Counter(self.tokens)
+
+        counts = np.array(
+            [word_counts[word] for word in self.V],
+            dtype=float
+        )
+
+        weights = counts ** 0.75
+        self.negative_probabilities = weights / weights.sum()
+
+
+        training_pairs = self.generate_training_pairs(self.tokens)
+        print(training_pairs)
 
 
 

@@ -6,6 +6,7 @@ import numpy as np
 
 class word2Vec:
 
+    # randomly initiliaze embeddings
     def initialize_embeddings(self):
         self.target_embeddings = np.random.uniform(
             -0.5 , 0.5, (len(self.V), self.D)
@@ -14,6 +15,28 @@ class word2Vec:
         self.context_embeddings = np.random.uniform(
             -0.5 , 0.5, (len(self.V), self.D)
         )
+
+    # generate positive pairs. its context winvow is 2
+    def generate_positive_pairs(self, tokens):
+        pairs = []
+
+        for target_position in range(len(tokens)):
+            target_word = tokens[target_position]
+            target_index = self.word_to_index[target_word]
+
+            start = max(0, target_position - 2)
+            end = min(len(tokens), target_position + 3)
+
+            for context_position in range(start, end):
+                if context_position == target_position:
+                    continue
+
+                context_word = tokens[context_position]
+                context_index = self.word_to_index[context_word]
+
+                pairs.append((target_index, context_index, 1))
+
+        return pairs
 
     def __init__(self):
 
@@ -57,8 +80,6 @@ class word2Vec:
         }
 
         self.initialize_embeddings()
-
-
         
 
 

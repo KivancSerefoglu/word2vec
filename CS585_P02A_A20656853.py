@@ -47,6 +47,37 @@ class word2Vec:
 
         return pairs
 
+    def train_pair(self, target_index, context_index, label, learning_rate):
+        target_vec = self.target_embeddings[target_index].copy()
+        context_vec = self.context_embeddings[context_index].copy()
+
+        score = np.dot(target_vec, context_vec)
+
+        # Numerically stable sigmoid input
+        score = np.clip(score, -30, 30)
+        prediction = 1 / (1 + np.exp(-score))
+
+        error = prediction - label
+
+        grad_target = error * context_vec
+        grad_context = error * target_vec
+
+        self.target_embeddings[target_index] -= learning_rate * grad_target
+        self.context_embeddings[context_index] -= learning_rate * grad_context
+
+    def save_embeddings(self):
+        embedding_path = (
+            Path(__file__).parent
+            / f"{Path(__file__).stem}_EMBED.TXT"
+        )
+
+        with open(embedding_path, "w", encoding="utf-8") as file:
+            for index, word in enumerate(self.V):
+                values = ", ".join(
+                    f"{value:.6f}" for value in self.target_embeddings[index]
+                )
+                file.write(f"{word}, {values}\n")
+
     def __init__(self):
 
         # Checking the number of args
@@ -98,6 +129,9 @@ class word2Vec:
 
     def main(self):
 
+        learning_rate = 0.02
+        num_epochs = 50
+
 
         word_counts = Counter(self.tokens)
 
@@ -111,13 +145,22 @@ class word2Vec:
 
 
         training_pairs = self.generate_training_pairs(self.tokens)
-        print(training_pairs)
-
-
-
-
-
         
+
+        for _ in range(num_epochs):
+            np.random.shuffle(training_pairs)
+
+            for target_index, context_index, label in training_pairs:
+                self.train_pair(
+                    target_index,
+                    context_index,
+                    label,
+                    learning_rate
+                )
+
+        self.save_embeddings()
+        
+
 
 
 if __name__ == "__main__":

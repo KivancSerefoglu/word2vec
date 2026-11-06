@@ -3,6 +3,7 @@ from pathlib import Path
 import re
 import numpy as np
 from collections import Counter
+import time
 
 
 
@@ -128,10 +129,10 @@ class word2Vec:
     
 
     def main(self):
-
         learning_rate = 0.02
         num_epochs = 50
 
+        start_time = time.perf_counter()
 
         word_counts = Counter(self.tokens)
 
@@ -143,9 +144,7 @@ class word2Vec:
         weights = counts ** 0.75
         self.negative_probabilities = weights / weights.sum()
 
-
         training_pairs = self.generate_training_pairs(self.tokens)
-        
 
         for _ in range(num_epochs):
             np.random.shuffle(training_pairs)
@@ -159,7 +158,17 @@ class word2Vec:
                 )
 
         self.save_embeddings()
-        
+
+        training_time = time.perf_counter() - start_time
+
+        output_file = f"{Path(__file__).stem}_EMBED.TXT"
+
+        print("Serefoglu, Kivanc, A2065683 solution:")
+        print(f"Number of dimensions: {self.D}")
+        print(f"Training file name: {self.CORPUS_FILE}")
+        print(f"Embedding file name: {output_file}")
+        print(f"Training time: {training_time:.3f} seconds")
+            
 
 
 

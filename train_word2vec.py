@@ -1,3 +1,14 @@
+"""Train skip-gram word2vec embeddings with negative sampling (NumPy only).
+
+Usage:
+    python train_word2vec.py D CORPUS_FILE
+
+Example:
+    python train_word2vec.py 50 data/corpus.txt
+
+Writes embeddings to embeddings/embeddings_D{D}.txt
+"""
+
 import sys
 from pathlib import Path
 import re
@@ -6,8 +17,11 @@ from collections import Counter
 import time
 
 
+PROJECT_DIR = Path(__file__).resolve().parent
+EMBEDDINGS_DIR = PROJECT_DIR / "embeddings"
 
-class word2Vec:
+
+class Word2Vec:
 
     # randomly initiliaze embeddings
     def initialize_embeddings(self):
@@ -69,10 +83,8 @@ class word2Vec:
         self.context_embeddings[context_index] -= learning_rate * grad_context
 
     def save_embeddings(self):
-        embedding_path = (
-            Path(__file__).parent
-            / f"{Path(__file__).stem}_EMBED_{self.D}.TXT"
-        )
+        EMBEDDINGS_DIR.mkdir(exist_ok=True)
+        embedding_path = self.output_path
 
         with open(embedding_path, "w", encoding="utf-8") as file:
             for index, word in enumerate(self.V):
@@ -85,7 +97,7 @@ class word2Vec:
 
         # Checking the number of args
         if len(sys.argv) != 3:
-            print("Error: expected D and CORPUS_FILE.")
+            print("Usage: python train_word2vec.py D CORPUS_FILE")
             raise SystemExit(1)
 
         # if given D is invalid, set it 50
@@ -99,13 +111,18 @@ class word2Vec:
             print("Invalid D. Using default D = 50.")
             self.D = 50
 
-        # Checking the given file exsits in folder
+        # Resolve the corpus path (relative to the current directory,
+        # falling back to the project directory)
         self.CORPUS_FILE = sys.argv[2]
-        self.corpus_path = Path(__file__).parent / self.CORPUS_FILE
+        self.corpus_path = Path(self.CORPUS_FILE)
+        if not self.corpus_path.is_file():
+            self.corpus_path = PROJECT_DIR / self.CORPUS_FILE
 
         if not self.corpus_path.is_file():
-            print("Error: corpus file does not exist in the same folder.")
+            print(f"Error: corpus file '{self.CORPUS_FILE}' does not exist.")
             raise SystemExit(1)
+
+        self.output_path = EMBEDDINGS_DIR / f"embeddings_D{self.D}.txt"
 
         # Creating Vocabulary from the given file by using white space tokenization
         with open(self.corpus_path, "r", encoding="utf-8") as file:
@@ -169,9 +186,9 @@ class word2Vec:
 
         training_time = time.perf_counter() - start_time
 
-        output_file = f"{Path(__file__).stem}_EMBED_{self.D}.TXT"
+        output_file = self.output_path.relative_to(PROJECT_DIR)
 
-        print("Serefoglu, Kivanc, A2065683 solution:")
+        print("Word2Vec training complete")
         print(f"Number of dimensions: {self.D}")
         print(f"Training file name: {self.CORPUS_FILE}")
         print(f"Embedding file name: {output_file}")
@@ -181,4 +198,4 @@ class word2Vec:
 
 
 if __name__ == "__main__":
-    word2Vec().main()
+    Word2Vec().main()

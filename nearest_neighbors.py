@@ -1,3 +1,11 @@
+"""Find the K nearest neighbors of a word and plot them in 3D (PCA).
+
+Usage:
+    python nearest_neighbors.py WORD K [EMBEDDING_FILE]
+
+Example:
+    python nearest_neighbors.py girl 5 embeddings/embeddings_D50.txt
+"""
 
 import csv
 import re
@@ -9,7 +17,8 @@ import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
 
 
-EMBEDDING_FILE = "CS585_P02A_A20656853_EMBED_50.TXT"
+PROJECT_DIR = Path(__file__).resolve().parent
+EMBEDDING_FILE = "embeddings/embeddings_D50.txt"
 DEFAULT_K = 5
 
 
@@ -58,7 +67,7 @@ def find_nearest_neighbors(word, embeddings, k):
     return similarities[:k]
 
 
-def plot_embeddings(word, neighbors, embeddings):
+def plot_embeddings(word, neighbors, embeddings, embedding_file=EMBEDDING_FILE):
     # Target word + K nearest neighbors
     words = [word] + [neighbor for neighbor, _ in neighbors]
 
@@ -123,7 +132,7 @@ def plot_embeddings(word, neighbors, embeddings):
 
     ax.set_title(
         f"Word2Vec: '{word}' and {len(neighbors)} Nearest Neighbors\n"
-        f"Embedding file: {EMBEDDING_FILE}"
+        f"Embedding file: {embedding_file}"
     )
 
     ax.legend()
@@ -136,17 +145,21 @@ def plot_embeddings(word, neighbors, embeddings):
 
 def main():
     # Check number of arguments
-    if len(sys.argv) != 3:
-        print("Error: expected WORD and K.")
+    if len(sys.argv) not in (3, 4):
+        print("Usage: python nearest_neighbors.py WORD K [EMBEDDING_FILE]")
         raise SystemExit(1)
 
-    # Check embedding file exists
-    embedding_path = Path(__file__).parent / EMBEDDING_FILE
+    # Resolve the embedding file (relative to the current directory,
+    # falling back to the project directory)
+    embedding_file = sys.argv[3] if len(sys.argv) == 4 else EMBEDDING_FILE
+    embedding_path = Path(embedding_file)
+    if not embedding_path.is_file():
+        embedding_path = PROJECT_DIR / embedding_file
 
     if not embedding_path.is_file():
         print(
-            f"Error: embedding file '{EMBEDDING_FILE}' "
-            "does not exist in the same folder."
+            f"Error: embedding file '{embedding_file}' does not exist. "
+            "Train one first with train_word2vec.py."
         )
         raise SystemExit(1)
 
@@ -198,7 +211,7 @@ def main():
         method = "Zero padding"
 
     # Required assignment output
-    print("Serefoglu, Kivanc, A20656853 solution:")
+    print(f"Embedding file: {embedding_file}")
     print(f"Word: {word}")
     print(f"Number of neighbors: {k}")
     print(f"Dimensionality reduction method: {method}")
@@ -208,7 +221,7 @@ def main():
         print(f"{neighbor}: {similarity:.6f}")
 
     # Visualize
-    plot_embeddings(word, neighbors, embeddings)
+    plot_embeddings(word, neighbors, embeddings, embedding_file)
 
 
 if __name__ == "__main__":

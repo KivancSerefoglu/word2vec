@@ -1,30 +1,27 @@
-# Assignment documents and temporary Office files
-*.doc
-*.docx
-~$*.docx
-
-# VS Code and other IDE metadata
-.vscode/
-.idea/
-
-# Python caches and generated files
+# Python
 __pycache__/
 *.py[cod]
-*.pyo
 
 # Virtual environments
 .venv/
 venv/
 env/
-ENV/
 
-# OS and editor files
+# IDE / OS
+.vscode/
+.idea/
 .DS_Store
 Thumbs.db
 *~
 
-# Generated images and text outputs
-*.png
-*.PNG
-*.txt
-*.TXT
+# Course material and submission artifacts (kept locally, not published)
+*.doc
+*.docx
+~$*
+*.pdf
+*.zip
+
+# Generated embeddings (regenerate with train_word2vec.py).
+# A single D=50 file is committed so nearest_neighbors.py works out of the box.
+embeddings/*
+!embeddings/embeddings_D50.txt

@@ -71,7 +71,7 @@ class word2Vec:
     def save_embeddings(self):
         embedding_path = (
             Path(__file__).parent
-            / f"{Path(__file__).stem}_EMBED.TXT"
+            / f"{Path(__file__).stem}_EMBED_{self.D}.TXT"
         )
 
         with open(embedding_path, "w", encoding="utf-8") as file:
@@ -169,7 +169,7 @@ class word2Vec:
 
         training_time = time.perf_counter() - start_time
 
-        output_file = f"{Path(__file__).stem}_EMBED.TXT"
+        output_file = f"{Path(__file__).stem}_EMBED_{self.D}.TXT"
 
         print("Serefoglu, Kivanc, A2065683 solution:")
         print(f"Number of dimensions: {self.D}")

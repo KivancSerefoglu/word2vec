@@ -1,3 +1,24 @@
-/CS585_Fall2026_Programming_Assignment_02.docx
+# Assignment documents and temporary Office files
+*.doc
+*.docx
+~$*.docx
+
+# VS Code and other IDE metadata
+.vscode/
+.idea/
+
+# Python caches and generated files
 __pycache__/
-*.pyc
+*.py[cod]
+*.pyo
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+*~

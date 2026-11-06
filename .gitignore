@@ -22,3 +22,9 @@ ENV/
 .DS_Store
 Thumbs.db
 *~
+
+# Generated images and text outputs
+*.png
+*.PNG
+*.txt
+*.TXT

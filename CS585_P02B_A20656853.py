@@ -122,7 +122,8 @@ def plot_embeddings(word, neighbors, embeddings):
     ax.set_zlabel("Dimension 3")
 
     ax.set_title(
-        f"Word2Vec: '{word}' and {len(neighbors)} Nearest Neighbors"
+        f"Word2Vec: '{word}' and {len(neighbors)} Nearest Neighbors\n"
+        f"Embedding file: {EMBEDDING_FILE}"
     )
 
     ax.legend()

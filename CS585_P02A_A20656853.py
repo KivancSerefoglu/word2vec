@@ -12,11 +12,13 @@ class word2Vec:
     # randomly initiliaze embeddings
     def initialize_embeddings(self):
         self.target_embeddings = np.random.uniform(
-            -0.5 , 0.5, (len(self.V), self.D)
+            -0.5 / np.sqrt(self.D), 0.5 / np.sqrt(self.D),
+            (len(self.V), self.D)
         )
 
         self.context_embeddings = np.random.uniform(
-            -0.5 , 0.5, (len(self.V), self.D)
+            -0.5 / np.sqrt(self.D), 0.5 / np.sqrt(self.D),
+            (len(self.V), self.D)
         )
 
     # generate pairs as positive and negative. its context window is 2
@@ -39,12 +41,12 @@ class word2Vec:
             for context_index in context_indices:
                 pairs.append((target_index, context_index, 1))
 
-                negative_index = np.random.choice(
-                    vocab_size,
-                    p=self.negative_probabilities
-                )
-
-                pairs.append((target_index, negative_index, 0))
+                for _ in range(5):
+                    negative_index = np.random.choice(
+                        vocab_size,
+                        p=self.negative_probabilities
+                    )
+                    pairs.append((target_index, negative_index, 0))
 
         return pairs
 
@@ -114,13 +116,19 @@ class word2Vec:
 
         self.tokens = text.split()
 
-        self.V = sorted(set(text.split()))
+        if not self.tokens:
+            print("Error: corpus contains no valid words.")
+            raise SystemExit(1)
+
+        self.V = sorted(set(self.tokens))
 
         #initalize word embeddings
 
         self.word_to_index = {
             word: index for index, word in enumerate(self.V)
         }
+
+        np.random.seed(42)
 
         self.initialize_embeddings()
         
@@ -144,9 +152,9 @@ class word2Vec:
         weights = counts ** 0.75
         self.negative_probabilities = weights / weights.sum()
 
-        training_pairs = self.generate_training_pairs(self.tokens)
 
         for _ in range(num_epochs):
+            training_pairs = self.generate_training_pairs(self.tokens)
             np.random.shuffle(training_pairs)
 
             for target_index, context_index, label in training_pairs:
